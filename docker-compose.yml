@@ -26,3 +26,5 @@ services:
     volumes:
       # Montamos os PDFs do backend aqui também para o Nginx conseguir entregar o download
       - ./backend/pdfs:/usr/share/nginx/html/pdfs
+
+      # Teste Linha
