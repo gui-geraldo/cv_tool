@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Serviço 1: API e Gerador de PDF
+  backend:
+    build: ./backend
+    container_name: cv_api
+    restart: always
+    environment:
+      - PORT=3000
+      # A URL base agora é o seu domínio
+      - BASE_URL=https://cv_tool.talkerflow.me 
+    volumes:
+      - ./backend/pdfs:/app/public/pdfs        # Onde salva os PDFs
+      - ./backend/templates:/app/templates     # Onde salva o modelo HTML
+
+  # Serviço 2: Servidor Web e Proxy Reverso
+  frontend:
+    build: ./frontend
+    container_name: cv_admin
+    restart: always
+    ports:
+      - "80:80"  # Recebe o tráfego da Cloudflare
+    depends_on:
+      - backend
+    volumes:
+      # Montamos os PDFs do backend aqui também para o Nginx conseguir entregar o download
+      - ./backend/pdfs:/usr/share/nginx/html/pdfs

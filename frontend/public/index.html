@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Gerador de Currículo</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f9; padding: 20px; display: flex; gap: 20px; height: 90vh; }
+        .editor-container { flex: 1; display: flex; flex-direction: column; }
+        textarea { flex: 1; width: 100%; padding: 15px; border: 1px solid #ccc; border-radius: 8px; font-family: monospace; font-size: 14px; resize: none; }
+        button { margin-top: 10px; padding: 15px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        button:hover { background: #1d4ed8; }
+        .preview-container { flex: 1; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; overflow-y: auto; }
+        h2 { margin-top: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="editor-container">
+        <h2>Editor de Template (HTML/CSS)</h2>
+        <textarea id="codeEditor"></textarea>
+        <button onclick="salvarTemplate()">Salvar Alterações</button>
+    </div>
+
+    <div class="preview-container">
+        <h2>Visualização (Aproximada)</h2>
+        <div id="previewArea">Carregando...</div>
+    </div>
+
+    <script>
+        const API_URL = '/api'; // O Nginx redireciona para o backend
+
+        // 1. Carregar Template ao abrir
+        async function carregarTemplate() {
+            try {
+                const res = await fetch(`${API_URL}/template`);
+                const data = await res.json();
+                document.getElementById('codeEditor').value = data.html;
+                atualizarPreview(data.html);
+            } catch (err) {
+                alert('Erro ao conectar com API');
+            }
+        }
+
+        // 2. Salvar Template
+        async function salvarTemplate() {
+            const html = document.getElementById('codeEditor').value;
+            const res = await fetch(`${API_URL}/template`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ html })
+            });
+            if (res.ok) {
+                alert('Template Salvo com Sucesso!');
+                atualizarPreview(html);
+            } else {
+                alert('Erro ao salvar.');
+            }
+        }
+
+        // Atualizar visualização local (sem gerar PDF)
+        function atualizarPreview(html) {
+            // Injeta dados falsos só para visualizar as variáveis
+            const preview = html
+                .replace(/{{nome}}/g, "João da Silva")
+                .replace(/{{email}}/g, "joao@email.com");
+            document.getElementById('previewArea').innerHTML = preview;
+        }
+
+        carregarTemplate();
+    </script>
+</body>
+</html>
