@@ -5,6 +5,34 @@ const fs = require('fs-extra');
 const path = require('path');
 const cors = require('cors');
 
+// ---- REGISTRA O HELPER formatDates ---- //
+handlebars.registerHelper('formatDates', function (dateRange) {
+    if (!dateRange) return '';
+
+    const [start, end] = dateRange.split(';');
+
+    function format(date) {
+        if (!date) return null;
+
+        const parts = date.split('-');
+        const year = parts[0];
+        const month = parts[1] ? parseInt(parts[1]) : null;
+
+        const meses = [
+            "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
+            "Jul", "Ago", "Set", "Out", "Nov", "Dez"
+        ];
+
+        return month ? `${meses[month - 1]}/${year}` : year;
+    }
+
+    const startFormatted = format(start);
+    const endFormatted = format(end) || "Atual";
+
+    return `${startFormatted} - ${endFormatted}`;
+});
+
+
 const app = express();
 const PORT = 3000;
 const BASE_URL = process.env.BASE_URL;
