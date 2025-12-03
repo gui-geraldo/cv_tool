@@ -9,41 +9,20 @@ services:
     environment:
       - PORT=3000
       # A URL base agora é o seu domínio
-      - BASE_URL=https://cv_tool.talkerflow.me
+      - BASE_URL=https://cv_tool.talkerflow.me 
     volumes:
       - ./backend/pdfs:/app/public/pdfs        # Onde salva os PDFs
       - ./backend/templates:/app/templates     # Onde salva o modelo HTML
-    networks:
-      - cv_net
 
-  # Serviço 2: Servidor Web (Nginx interno do frontend)
+  # Serviço 2: Servidor Web e Proxy Reverso
   frontend:
     build: ./frontend
     container_name: cv_admin
     restart: always
+    ports:
+      - "80:80"  # Recebe o tráfego da Cloudflare
     depends_on:
       - backend
     volumes:
       # Montamos os PDFs do backend aqui também para o Nginx conseguir entregar o download
       - ./backend/pdfs:/usr/share/nginx/html/pdfs
-    networks:
-      - cv_net
-
-  # Serviço 3: Proxy reverso NGINX (exposto na porta 80)
-  proxy:
-    image: nginx:latest
-    container_name: cv_proxy
-    restart: always
-    ports:
-      - "80:80"  # Recebe o tráfego da Cloudflare
-    volumes:
-      - /root/cv_project/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - cv_net
-
-networks:
-  cv_net:
-    external: true
